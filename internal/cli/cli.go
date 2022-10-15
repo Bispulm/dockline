@@ -17,8 +17,7 @@ import (
 
 func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
-		fmt.Fprintln(stdout, "dockline import --input FILE|- --output DIR [--invalid fail|skip] [--duplicates fail|skip]\ndockline verify --snapshot DIR [--input FILE]\ndockline version")
-		return 0
+		return writeText(stdout, stderr, "dockline import --input FILE|- --output DIR [--invalid fail|skip] [--duplicates fail|skip]\ndockline verify --snapshot DIR [--input FILE]\ndockline version")
 	}
 	var err error
 	switch args[0] {
@@ -27,8 +26,7 @@ func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 			fmt.Fprintln(stderr, "version accepts no arguments")
 			return 2
 		}
-		fmt.Fprintln(stdout, model.Version)
-		return 0
+		return writeText(stdout, stderr, model.Version)
 	case "import":
 		err = importCommand(ctx, args[1:], stdin, stdout, stderr)
 	case "verify":
@@ -52,6 +50,15 @@ func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 		return 130
 	}
 	return 1
+}
+
+// writeText reports output errors rather than returning a misleading success.
+func writeText(stdout, stderr io.Writer, text string) int {
+	if _, err := fmt.Fprintln(stdout, text); err != nil {
+		fmt.Fprintln(stderr, "dockline: write output:", err)
+		return 1
+	}
+	return 0
 }
 
 type usageError struct{ error }
