@@ -1,12 +1,24 @@
 # Dockline
 
-A Go command-line project for converting NDJSON input into verifiable local snapshots.
+**Deterministic NDJSON imports. Verifiable local snapshots.**
 
-## Implementation plan
+Dockline is a Go command-line tool that validates line-delimited JSON,
+applies duplicate and invalid-record policies, and publishes a snapshot
+with SHA-256 integrity checks.
 
-Start with the record contract and bounded line framing, then add the import
-engine, snapshot publication, verification, and command-line interface.
-Keep parsing and policy decisions separate from filesystem ownership.
+## Quick start
 
-The first milestone is complete imports with deterministic manifests.
-Checkpointed recovery is a separate follow-on milestone.
+Use Linux and Go 1.23 or newer. There are no third-party Go dependencies.
+
+```sh
+go test ./...
+make build
+./bin/dockline import --input examples/events.ndjson --output out/events
+./bin/dockline verify --snapshot out/events --input examples/events.ndjson
+```
+
+The output directory must not already exist. It contains accepted records,
+rejection reasons, and a manifest. Records stay in NDJSON.
+
+This release implements complete imports. Checkpointed recovery is planned;
+there is no resume command or option yet.

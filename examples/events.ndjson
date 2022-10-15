@@ -1,0 +1,3 @@
+{"id":"event-001","kind":"device.reading","device":"sensor-a","value":21.4}
+{"id":"event-002","kind":"device.reading","device":"sensor-b","value":19.8}
+{"id":"event-003","kind":"device.counter","device":"sensor-a","value":9007199254740993}
