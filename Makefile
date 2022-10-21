@@ -1,15 +1,26 @@
-.PHONY: test check build demo
+.PHONY: build test check fmt fmt-check demo bench fuzz
+
+build:
+	go build -trimpath -buildvcs=false -o bin/dockline ./cmd/dockline
 
 test:
-	go test ./...
+	go test -count=1 ./...
 
-check:
+fmt:
+	gofmt -w cmd internal
+
+fmt-check:
+	@if test -n "$$(gofmt -l cmd internal)"; then gofmt -l cmd internal; exit 1; fi
+
+check: fmt-check
 	go vet ./...
 	go test -race -count=1 ./...
 
-build:
-	go build -buildvcs=false -o bin/dockline ./cmd/dockline
+demo:
+	./scripts/demo.sh
 
-demo: build
-	./bin/dockline import --input examples/events.ndjson --output out/events
-	./bin/dockline verify --snapshot out/events --input examples/events.ndjson
+bench:
+	go test ./internal/engine -run '^$$' -bench BenchmarkImport -benchmem
+
+fuzz:
+	go test ./internal/model -run '^$$' -fuzz FuzzParseRecord -fuzztime 3s
